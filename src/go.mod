@@ -8,7 +8,10 @@ require (
 	golang.org/x/time v0.10.0
 )
 
+require github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
+
 require (
 	github.com/andybalholm/cascadia v1.3.3 // indirect
+	github.com/vmihailenco/msgpack/v5 v5.4.1
 	golang.org/x/net v0.33.0 // indirect
 )

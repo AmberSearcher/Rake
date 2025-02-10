@@ -95,15 +95,22 @@ func (c *Crawler) fetchURL(targetURL string) {
 
 func (c *Crawler) fetch(targetURL string) (*goquery.Document, error) {
 	resp, err := http.Get(targetURL)
-	if err != nil || resp.StatusCode != http.StatusOK {
+	if err != nil {
 		return nil, err
 	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("received HTTP status %d", resp.StatusCode)
+	}
 
 	return goquery.NewDocumentFromReader(resp.Body)
 }
 
 func (c *Crawler) extractData(url string, doc *goquery.Document) types.PageData {
+	if doc == nil {
+		return types.PageData{}
+	}
 	return types.PageData{
 		URL:   url,
 		Title: doc.Find("title").Text(),
