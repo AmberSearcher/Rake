@@ -131,4 +131,4 @@ dist
 
 # Rake
 builds
-crawl_data.awf
+*.awf
