@@ -1,0 +1,41 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Build for Windows on Windows",
+      "type": "shell",
+      "command": "go build -o builds/windows/RakeCrawler.exe && cp urls.txt blacklist.txt builds/windows",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "Build for Linux on Windows",
+      "type": "shell",
+      "command": "set GOOS=linux && go build -o builds/windows/RakeCrawler && cp urls.txt blacklist.txt builds/windows",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "Build for Linux on Linux",
+      "type": "shell",
+      "command": "go build -o builds/linux/RakeCrawler.exe && cp urls.txt blacklist.txt builds/linux",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "Build for Windows on Linux",
+      "type": "shell",
+      "command": "GOOS=windows GOARCH=amd64 go build -o builds/windows/RakeCrawler.exe && cp urls.txt blacklist.txt builds/windows",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    }
+  ]
+}
