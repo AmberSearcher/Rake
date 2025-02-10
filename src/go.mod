@@ -1,4 +1,4 @@
-module crawler
+module webcrawler
 
 go 1.23.5
 
