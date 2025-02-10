@@ -14,7 +14,7 @@ import (
 
 var (
 	inputDir    = "./data/"         // Directory containing .awf files
-	outputFile  = "combined_data.awf"
+	outputFile  = "database.awf"
 	outputTxt   = "links.txt"
 	fileMutex   sync.Mutex
 	seenURLs    = make(map[string]bool) // To remove duplicates

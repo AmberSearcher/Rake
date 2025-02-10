@@ -1,0 +1,15 @@
+# Welcome to the configuration file!
+# Specify the websites you wish to scrape, those to ignore, and those for which you want to bypass the robots.txt restrictions.
+# Use a hashtag to add comments.
+
+Websites:
+	https://abstractmelon.net
+	https://thunderstore.io/
+
+Blacklist:
+	cloudflare.com
+	iana.org
+	google-analytics.com
+
+Bypass:
+	https://google.com

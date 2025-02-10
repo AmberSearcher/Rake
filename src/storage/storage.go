@@ -116,7 +116,7 @@ func writeRecord(data []byte) error {
 	return nil
 }
 
-// Close ensures all buffered data is written to the file
+// Make sure all buffered data is written to the file
 func Close() {
 	fileMutex.Lock()
 	defer fileMutex.Unlock()

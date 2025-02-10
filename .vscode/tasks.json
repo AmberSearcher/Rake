@@ -4,7 +4,7 @@
     {
       "label": "Build for Windows on Windows",
       "type": "shell",
-      "command": "go build -o builds/windows/RakeCrawler.exe && cp urls.txt blacklist.txt builds/windows",
+      "command": "cd src && go build -o ../builds/windows/RakeCrawler.exe main.go && cp config.rcf ../builds/windows",
       "group": {
         "kind": "build",
         "isDefault": true
@@ -13,7 +13,7 @@
     {
       "label": "Build for Linux on Windows",
       "type": "shell",
-      "command": "set GOOS=linux && go build -o builds/windows/RakeCrawler && cp urls.txt blacklist.txt builds/windows",
+      "command": "cd src && set GOOS=linux && go build -o ../builds/windows/RakeCrawler main.go && cp config.rcf ../builds/windows",
       "group": {
         "kind": "build",
         "isDefault": true
@@ -22,7 +22,7 @@
     {
       "label": "Build for Linux on Linux",
       "type": "shell",
-      "command": "go build -o builds/linux/RakeCrawler.exe && cp urls.txt blacklist.txt builds/linux",
+      "command": "cd src && go build -o ../builds/linux/RakeCrawler main.go && cp config.rcf ../builds/linux",
       "group": {
         "kind": "build",
         "isDefault": true
@@ -31,7 +31,25 @@
     {
       "label": "Build for Windows on Linux",
       "type": "shell",
-      "command": "GOOS=windows GOARCH=amd64 go build -o builds/windows/RakeCrawler.exe && cp urls.txt blacklist.txt builds/windows",
+      "command": "cd src && GOOS=windows GOARCH=amd64 go build -o ../builds/windows/RakeCrawler.exe main.go && cp config.rcf ../builds/windows",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "Build for Android on Linux",
+      "type": "shell",
+      "command": "cd src && GOOS=android GOARCH=arm64 go build -o ../builds/android/RakeCrawler main.go && cp config.rcf ../builds/android",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "Build for Android on Windows",
+      "type": "shell",
+      "command": "cd src && set GOOS=android && set GOARCH=arm64 && go build -o ../builds/android/RakeCrawler main.go && cp config.rcf ../builds/android",
       "group": {
         "kind": "build",
         "isDefault": true
@@ -40,7 +58,7 @@
     {
       "label": "Build all on Linux",
       "type": "shell",
-      "command": "go build -o builds/linux/RakeCrawler.exe && cp urls.txt blacklist.txt builds/linux && GOOS=windows GOARCH=amd64 go build -o builds/linux/RakeCrawler.exe && cp urls.txt blacklist.txt builds/linux",
+      "command": "cd src && go build -o ../builds/linux/RakeCrawler main.go && cp config.rcf ../builds/linux && GOOS=windows GOARCH=amd64 go build -o ../builds/windows/RakeCrawler.exe main.go && cp config.rcf ../builds/windows && GOOS=android GOARCH=arm64 go build -o ../builds/android/RakeCrawler main.go && cp config.rcf ../builds/android",
       "group": {
         "kind": "build",
         "isDefault": true
@@ -49,7 +67,7 @@
     {
       "label": "Build all on Windows",
       "type": "shell",
-      "command": "go build -o builds/windows/RakeCrawler.exe && cp urls.txt blacklist.txt builds/windows && set GOOS=linux && go build -o builds/windows/RakeCrawler && cp urls.txt blacklist.txt builds/windows",
+      "command": "cd src && go build -o ../builds/windows/RakeCrawler.exe main.go && cp config.rcf ../builds/windows && set GOOS=linux && go build -o ../builds/windows/RakeCrawler main.go && cp config.rcf ../builds/windows && set GOOS=android && set GOARCH=arm64 && go build -o ../builds/android/RakeCrawler main.go && cp config.rcf ../builds/android",
       "group": {
         "kind": "build",
         "isDefault": true

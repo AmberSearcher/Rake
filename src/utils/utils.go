@@ -15,12 +15,13 @@ import (
 )
 
 var (
-	robotsMap = make(map[string]*robotstxt.RobotsData)
-	robotsMu  sync.Mutex
-	blacklist = make(map[string]bool)
+	robotsMap  = make(map[string]*robotstxt.RobotsData)
+	robotsMu   sync.Mutex
+	blacklist  = make(map[string]bool)
+	bypassList = make(map[string]bool)
 )
 
-func ReadURLs(filename string) ([]string, error) {
+func ReadConfig(filename string) ([]string, error) {
 	file, err := os.Open(filename)
 	if err != nil {
 		return nil, err
@@ -29,24 +30,30 @@ func ReadURLs(filename string) ([]string, error) {
 
 	var urls []string
 	scanner := bufio.NewScanner(file)
+	section := ""
 	for scanner.Scan() {
-		urls = append(urls, scanner.Text())
+		line := strings.TrimSpace(scanner.Text())
+		if strings.HasPrefix(line, "#") || line == "" {
+			continue
+		}
+		if strings.HasSuffix(line, ":") {
+			section = strings.TrimSuffix(line, ":")
+			continue
+		}
+		switch section {
+		case "Websites":
+			urls = append(urls, strings.Fields(line)...)
+		case "Blacklist":
+			for _, item := range strings.Fields(line) {
+				blacklist[item] = true
+			}
+		case "Bypass":
+			for _, item := range strings.Fields(line) {
+				bypassList[item] = true
+			}
+		}
 	}
 	return urls, scanner.Err()
-}
-
-func ReadBlacklist(filename string) error {
-	file, err := os.Open(filename)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		blacklist[scanner.Text()] = true
-	}
-	return scanner.Err()
 }
 
 func IsBlacklisted(targetURL string) bool {
@@ -59,6 +66,10 @@ func IsBlacklisted(targetURL string) bool {
 }
 
 func CanCrawl(targetURL, userAgent string) bool {
+	if strings.Contains(targetURL, "://"+domainForBypass()) {
+		return true
+	}
+
 	parsedURL, err := url.Parse(targetURL)
 	if err != nil {
 		return false
@@ -77,6 +88,14 @@ func CanCrawl(targetURL, userAgent string) bool {
 		return robots.TestAgent(parsedURL.Path, userAgent)
 	}
 	return true
+}
+
+func domainForBypass() string {
+	var domain string
+	for domain = range bypassList {
+		return domain
+	}
+	return ""
 }
 
 func fetchRobotsTxt(parsedURL *url.URL, domain string) *robotstxt.RobotsData {
@@ -115,8 +134,9 @@ func ResolveURL(base, link string) string {
 func DisplayProgress(start time.Time) {
 	for {
 		time.Sleep(time.Second / 8)
-		fmt.Printf("\rCurrently scraping: Website #%d Running Time: %.2fs", 
-			len(blacklist), // This should be replaced with actual queue length
+		fmt.Printf("\rItems left in queue: %d, Items processed so far: %d, Running Time: %.2fs", 
+			len(blacklist), // queue
+			len(blacklist), 
 			time.Since(start).Seconds())
 	}
 }
