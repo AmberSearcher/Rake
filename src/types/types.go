@@ -1,6 +1,6 @@
 package types
 
 type PageData struct {
-	URL   string `json:"url"`
-	Title string `json:"title"`
+	URL   string `json:"url"` // Page URL
+	Title string `json:"title"` // Page title
 }

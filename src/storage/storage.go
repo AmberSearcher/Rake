@@ -5,7 +5,9 @@ import (
 	"encoding/binary"
 	"fmt"
 	"os"
+	"os/signal"
 	"sync"
+	"syscall"
 
 	"webcrawler/types"
 
@@ -17,7 +19,21 @@ var (
 	fileHandle  *os.File
 	writer      *bufio.Writer
 	storageFile = "crawl_data.awf" // Default filename
+	shutdown    = make(chan struct{})
+	sigChan     = make(chan os.Signal, 1)
 )
+
+// Initialize storage (thread-safe)
+func Init() {
+	// Capture SIGINT and SIGTERM
+	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-sigChan
+		fmt.Println("\n[Signal Received] Flushing data before exit...")
+		Close()
+		os.Exit(0)
+	}()
+}
 
 // SetStorageFile configures output filename (thread-safe)
 func SetStorageFile(filename string) {
@@ -32,6 +48,7 @@ func SetStorageFile(filename string) {
 	storageFile = filename
 }
 
+// Initialize storage (thread-safe)
 func initStorage() error {
 	fileMutex.Lock()
 	defer fileMutex.Unlock()
@@ -43,10 +60,15 @@ func initStorage() error {
 		}
 		fileHandle = f
 		writer = bufio.NewWriter(f)
+		go func() {
+			<-shutdown
+			Close()
+		}()
 	}
 	return nil
 }
 
+// Save data (thread-safe)
 func SaveData(data types.PageData) {
 	if fileHandle == nil {
 		if err := initStorage(); err != nil {
@@ -94,6 +116,7 @@ func writeRecord(data []byte) error {
 	return nil
 }
 
+// Close ensures all buffered data is written to the file
 func Close() {
 	fileMutex.Lock()
 	defer fileMutex.Unlock()
@@ -104,4 +127,6 @@ func Close() {
 	if fileHandle != nil {
 		fileHandle.Close()
 	}
+	fmt.Println("[Storage Closed]")
 }
+

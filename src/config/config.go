@@ -1,10 +1,10 @@
 package config
 
 type Config struct {
-	WorkerCount int
-	RateLimit   int
-	QueueSize   int
-	UserAgent   string
+	WorkerCount int // Number of worker goroutines
+	RateLimit   int // Number of requests per second
+	QueueSize   int // Maximum number of URLs in the queue
+	UserAgent   string // User agent string
 }
 
 func DefaultConfig() *Config {
