@@ -14,6 +14,21 @@ import (
 	"github.com/temoto/robotstxt"
 )
 
+// Progress tracking
+var (
+	queueSize     int64
+	processedSize int64
+	progressMu    sync.Mutex
+)
+
+// UpdateProgress updates the crawler's progress metrics
+func UpdateProgress(inQueue, processed int64) {
+	progressMu.Lock()
+	queueSize = inQueue
+	processedSize = processed
+	progressMu.Unlock()
+}
+
 var (
 	robotsMap  = make(map[string]*robotstxt.RobotsData)
 	robotsMu   sync.Mutex
@@ -134,9 +149,14 @@ func ResolveURL(base, link string) string {
 func DisplayProgress(start time.Time) {
 	for {
 		time.Sleep(time.Second / 8)
+		progressMu.Lock()
+		queue := queueSize
+		processed := processedSize
+		progressMu.Unlock()
+		
 		fmt.Printf("\rItems left in queue: %d, Items processed so far: %d, Running Time: %.2fs", 
-			len(blacklist), // queue
-			len(blacklist), 
+			queue,
+			processed,
 			time.Since(start).Seconds())
 	}
 }

@@ -22,6 +22,7 @@ type Crawler struct {
 	visitedMu sync.Mutex
 	queue     chan string
 	wg        sync.WaitGroup
+	processed int64
 	limiter   *rate.Limiter
 }
 
@@ -64,6 +65,12 @@ func (c *Crawler) fetchURL(targetURL string) {
 	// Respect rate limiter
 	c.limiter.Wait(context.Background())
 
+	// Update progress metrics
+	c.visitedMu.Lock()
+	processed := c.processed
+	c.visitedMu.Unlock()
+	utils.UpdateProgress(int64(len(c.queue)), processed)
+
 	// Check robots.txt
 	if !utils.CanCrawl(targetURL, c.config.UserAgent) {
 		fmt.Println("\r[Blocked by robots.txt]", targetURL)
@@ -91,6 +98,11 @@ func (c *Crawler) fetchURL(targetURL string) {
 	c.queueNewLinks(targetURL, doc)
 
 	fmt.Println("\r[Crawled]", targetURL)
+
+	// Increment processed counter
+	c.visitedMu.Lock()
+	c.processed++
+	c.visitedMu.Unlock()
 }
 
 func (c *Crawler) fetch(targetURL string) (*goquery.Document, error) {
@@ -136,5 +148,9 @@ func (c *Crawler) addToQueue(targetURL string) {
 		c.visited[targetURL] = true
 		c.wg.Add(1)
 		c.queue <- targetURL
+		
+		// Update progress metrics after adding to queue
+		utils.UpdateProgress(int64(len(c.queue)), c.processed)
 	}
 }
+
