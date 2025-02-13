@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -36,7 +37,7 @@ Welcome to Rake, the web crawler!
 
 	// Wait 2 seconds before starting the crawler
 	time.Sleep(2 * time.Second)
-	
+
 	// Display progress
 	start := time.Now()
 	go utils.DisplayProgress(start)
@@ -44,9 +45,11 @@ Welcome to Rake, the web crawler!
 	// Initialize storage
 	storage.Init()
 
+	// Create a context with a timeout 
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
+	defer cancel() // Make sure the context is canceled when the program exits
+
 	// Start the crawler
 	crawler := crawler.NewCrawler(config.DefaultConfig())
-	crawler.Start(startURLs)
+	crawler.Start(ctx, startURLs) // Pass the context and startURLs
 }
-
-

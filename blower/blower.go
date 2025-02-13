@@ -3,11 +3,14 @@ package main
 import (
 	"bufio"
 	"encoding/binary"
+	"encoding/json"
 	"fmt"
 	"io"
 	"os"
 	"path/filepath"
+	"sort"
 	"sync"
+	"time"
 
 	"github.com/vmihailenco/msgpack/v5"
 )
@@ -15,15 +18,26 @@ import (
 var (
 	inputDir    = "./data/"         // Directory containing .awf files
 	outputFile  = "database.awf"
-	outputTxt   = "links.txt"
+	outputTxt   = "database.json"
 	fileMutex   sync.Mutex
 	seenURLs    = make(map[string]bool) // To remove duplicates
-	uniquePages []PageData        // Store unique entries
+	uniquePages []PageData              // Store unique entries
 )
 
 type PageData struct {
-	URL   string `json:"url"` // Page URL
-	Title string `json:"title"` // Page title
+	URL          string    `json:"url"`            // Page URL
+	Title        string    `json:"title"`          // Page title
+	Description  string    `json:"description"`    // Page description
+	Meta         []Meta    `json:"meta"`           // Page metadata
+	LastModified time.Time `json:"last_modified"`  // Page last modified time
+	Links        []string  `json:"links"`          // Page links
+	Language     string    `json:"language"`       // Page language
+	Favicon      string    `json:"favicon"`        // Page favicon
+}
+
+type Meta struct {
+	Name    string `json:"name"`
+	Content string `json:"content"`
 }
 
 // Read an AWF file and extract PageData
@@ -121,8 +135,22 @@ func writeLinksTxt() error {
 	writer := bufio.NewWriter(file)
 	defer writer.Flush()
 
+	// Sort the pages by last modified time
+	sort.Slice(uniquePages, func(i, j int) bool {
+		return uniquePages[i].LastModified.After(uniquePages[j].LastModified)
+	})
+
 	for _, page := range uniquePages {
-		_, err := writer.WriteString(page.URL + "\n")
+		pageJSON, err := json.MarshalIndent(page, "", "  ")
+		if err != nil {
+			return err
+		}
+
+		_, err = writer.Write(pageJSON)
+		if err != nil {
+			return err
+		}
+		_, err = writer.WriteString("\n\n")
 		if err != nil {
 			return err
 		}
@@ -155,3 +183,4 @@ func main() {
 		fmt.Println("Error saving links:", err)
 	}
 }
+
